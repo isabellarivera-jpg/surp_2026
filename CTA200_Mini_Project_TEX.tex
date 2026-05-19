@@ -29,103 +29,49 @@
 \section{Introduction}
 \label{sec:intro}
 
-Radio astronomy probes astrophysical emission over a broad range of
-frequencies, from roughly 3~kHz to 900~GHz \citep{nrao_radio}. Depending on the frequency at which a radio source is observed, the source
-can appear different. A single radio image therefore captures a source at
-only one frequency, while multi-frequency observations can reveal
-complementary information about its structure that cannot be obtained from
-any single observation. In this mini-project, I examine FITS images of the
-same source obtained from three radio surveys spanning roughly an order of
-magnitude in observing frequency: VLASS
-\citep[Very Large Array Sky Survey, 3~GHz;][]{lacy_2020}, FIRST
-\citep[Faint Images of the Radio Sky at Twenty centimeters, 1.4~GHz;][]{becker_1995},
-and LoTSS \citep[LOFAR Two-metre Sky Survey, 300~MHz;][]{shimwell_2017}.
-This range allows the source morphology to be compared across very
-different angular resolutions and wavelength regimes.
+Radio astronomy probes astrophysical emission over a broad range of frequencies, from roughly 3~kHz to 900~GHz \citep{nrao_radio}. Depending on the frequency at which a radio source is observed, the source can appear different. A single radio image therefore captures a source at only one frequency, while multi-frequency observations can reveal complementary information about its structure that cannot be obtained from any single observation. In this mini-project, I examine FITS images of the same source obtained from three radio surveys spanning roughly an order of magnitude in observing frequency: VLASS \citep[Very Large Array Sky Survey, 3~GHz;][]{lacy_2020}, FIRST \citep[Faint Images of the Radio Sky at Twenty centimeters, 1.4~GHz;][]{becker_1995}, and LoTSS \citep[LOFAR Two-metre Sky Survey, 300~MHz;][]{shimwell_2017}. This range allows the source morphology to be compared across very different angular resolutions and wavelength regimes.
 
-Using the \texttt{radioquery} package developed by Mattias Lazda, I downloaded the survey images of the source and produced right ascension-declination maps centered on
-the target source for each survey. I then compared the apparent morphology of
-the source across the three observing frequencies. One important factor
-affecting these images is angular resolution. For a radio telescope or interferometer, the characteristic angular
-resolution is set by the ratio of the observing wavelength $\lambda$
-to the telescope diameter or maximum interferometric baseline $D$,
+Using the \texttt{radioquery} package developed by Mattias Lazda, I downloaded the survey images of the source and produced right ascension-declination maps centered on the target source for each survey. I then compared the apparent morphology of the source across the three observing frequencies. One important factor affecting these images is angular resolution. For a radio telescope or interferometer, the characteristic angular resolution is set by the ratio of the observing wavelength $\lambda$ to the telescope diameter or maximum interferometric baseline $D$,
 %
 \begin{equation}
   \theta \sim \frac{\lambda}{D},
   \label{eq:resolution}
 \end{equation}
 %
-where smaller values of $\theta$ correspond to finer angular resolution.
-For a fixed telescope size or baseline, longer-wavelength,
-lower-frequency observations produce a larger synthesized beam and
-therefore a coarser image \citep{condon_ransom_2016}.
+where smaller values of $\theta$ correspond to finer angular resolution. For a fixed telescope size or baseline, longer-wavelength,
+lower-frequency observations produce a larger synthesized beam and therefore a coarser image \citep{condon_ransom_2016}.
 
 In this report, I discuss the methods used in this data analysis in Section~\ref{sec:methods}, present the resulting plots in Section~\ref{sec:results}, and interpret these results and summarize my conclusions in Section~\ref{sec:discussion}.
 
 \section{Methods}
 \label{sec:methods}
 
-The project is split across two Python scripts. The first,
-\texttt{download\_radio\_image.py}, defines a reusable function that
-downloads a FITS file for a given (RA, Dec) and survey name using the
-\texttt{radioquery} package made by Mattias Lazda. The second script
-\texttt{FITS\_images.ipynb} loads those FITS files and produces RA and
-Dec plots.
+The project is split across two Python scripts. The first, \texttt{download\_radio\_image.py}, defines a reusable function that downloads a FITS file for a given (RA, Dec) and survey name using the \texttt{radioquery} package made by Mattias Lazda. The second script \texttt{FITS\_images.ipynb} loads those FITS files and produces RA and Dec plots.
 
 \subsection{Environment setup}
 
-To download the FITS files for this analysis, I generated an SSH key and added it to my GitHub account to enable authenticated access to my project repository. I then installed the \texttt{radioquery} package inside a dedicated \texttt{conda} environment using the dependencies listed in the \texttt{radioquery} README. This environment included the packages needed to query radio survey images, manipulate FITS files, and produce the final plots, including \texttt{astropy},
-\texttt{numpy}, and \texttt{matplotlib}. Using a separate \texttt{conda} environment isolates the project dependencies from the system Python installation, which is useful because the larger-scale version of this analysis will eventually be run on a remote machine with more storage and processing capacity than my laptop.
+To download the FITS files for this analysis, I generated an SSH key and added it to my GitHub account to enable authenticated access to my project repository. I then installed the \texttt{radioquery} package inside a dedicated \texttt{conda} environment using the dependencies listed in the \texttt{radioquery} README. This environment included the packages needed to query radio survey images, manipulate FITS files, and produce the final plots, including \texttt{astropy}, \texttt{numpy}, and \texttt{matplotlib}. Using a separate \texttt{conda} environment isolates the project dependencies from the system Python installation, which is useful because the larger-scale version of this analysis will eventually be run on a remote machine with more storage and processing capacity than my laptop.
 
 \subsection{Downloading the data}
 
-I then wrote the function \texttt{download\_radio\_image(ra, dec, survey)} to
-download a FITS image for a specified sky position and radio survey. The
-function takes the target right ascension, declination, and survey name as
-inputs. It converts the coordinates into an
-\texttt{astropy.coordinates.SkyCoord} object, checks that the requested
-survey is valid, and selects the corresponding \texttt{radioquery} query
-class: \texttt{VlassQuery} for VLASS, \texttt{FirstQuery} for FIRST, or
-\texttt{LotssQuery} for LoTSS. The resulting FITS file is then saved to an output directory specific to that survey.
-
-This wrapper lets all three surveys be called with the same syntax and can be
-applied to many sources by looping over RA/Dec pairs. I tested that it works properly using the
-example coordinates from the \texttt{radioquery} README, RA~=~10h50m07.270s
-and Dec~=~$+30^\circ40'37.52''$.
+I then wrote the function \texttt{download\_radio\_image(ra, dec, survey)} to download a FITS image for a specified sky position and radio survey. The function takes the target right ascension, declination, and survey name as inputs. It converts the coordinates into an
+\texttt{astropy.coordinates.SkyCoord} object, checks that the requested survey is valid, and selects the corresponding \texttt{radioquery} query
+class: \texttt{VlassQuery} for VLASS, \texttt{FirstQuery} for FIRST, or \texttt{LotssQuery} for LoTSS. The resulting FITS file is then saved to an output directory specific to that survey. This wrapper lets all three surveys be called with the same syntax and can be applied to many sources by looping over RA/Dec pairs. I tested that it works properly using the example coordinates from the \texttt{radioquery} README, RA~=~10h50m07.270s and Dec~=~$+30^\circ40'37.52''$.
 
 \subsection{Loading and locating the source}
 
-The plotting script I made, \texttt{FITS\_images.ipynb}, opens each downloaded FITS
-file using 
-\texttt{astropy.io.fits}. Radio FITS images often store their data with additional dimensions for
-frequency and polarization, even when only one frequency channel and one
-polarization image are present. These extra single-element dimensions were
-removed using \texttt{.squeeze()}, producing a two-dimensional image suitable
-for plotting. The celestial world coordinate system is then extracted
-from the FITS header using \texttt{WCS(header).celestial}.
+The plotting script I made, \texttt{FITS\_images.ipynb}, opens each downloaded FITS file using \texttt{astropy.io.fits}. Radio FITS images often store their data with additional dimensions for frequency and polarization, even when only one frequency channel and one polarization image are present. These extra single-element dimensions were removed using \texttt{.squeeze()}, producing a two-dimensional image suitable
+for plotting. The celestial world coordinate system is then extracted from the FITS header using \texttt{WCS(header).celestial}.
 
-The target position is defined as an ICRS \texttt{SkyCoord} object and
-converted separately into pixel coordinates for each survey using
-\texttt{wcs.world\_to\_pixel}. This step is necessary because each survey has
-a different pixel scale and WCS, so the same sky coordinate does not correspond
-to the same pixel location in each FITS image.
+The target position is defined as an ICRS \texttt{SkyCoord} object and converted separately into pixel coordinates for each survey using
+\texttt{wcs.world\_to\_pixel}. This step is necessary because each survey has a different pixel scale and WCS, so the same sky coordinate does not correspond to the same pixel location in each FITS image.
 
 \subsection{Matching the cutout region across surveys}
 \label{ssec:crop}
 
-To compare the source morphology across surveys, each image was cropped to the
-same angular size on the sky rather than the same number of pixels. This is
-necessary because VLASS, FIRST, and LoTSS have different pixel scales, so the
-same pixel width would not correspond to the same sky area in each image.
+To compare the source morphology across surveys, each image was cropped to the same angular size on the sky rather than the same number of  pixels. This is necessary because VLASS, FIRST, and LoTSS have different pixel scales, so the same pixel width would not correspond to the same sky area in each image.
 
-I therefore used a helper function, \texttt{arcsec\_to\_pixels(wcs, arcsec)},
-to convert my chosen angular half-width of $90''$ into the correct number of
-pixels for each survey. This conversion uses the WCS pixel scale, since each
-survey has a different number of arcseconds per pixel. A half-width of $90''$
-on each side of the source gives a total cutout size of $3' \times 3'$,
-centered on the target. This ensures that the VLASS, FIRST, and LoTSS panels
-all show the same region of sky, so the source morphology can be compared
-directly across observing frequencies.
+I therefore used a helper function, \texttt{arcsec\_to\_pixels(wcs, arcsec)}, to convert my chosen angular half-width of $90''$ into the correct number of pixels for each survey. This conversion uses the WCS pixel scale, since each survey has a different number of arcseconds per pixel. A half-width of $90''$ on each side of the source gives a total cutout size of $3' \times 3'$, centered on the target. This ensures that the VLASS, FIRST, and LoTSS panels all show the same region of sky, so the source morphology can be compared directly across observing frequencies.
 
 \subsection{Noise and peak estimation}
 
@@ -133,40 +79,23 @@ For each image, the RMS noise was estimated from a source-free region in the top
 
 Because the full survey images have different pixel dimensions, the RMS noise was measured using a source-free corner region whose size was chosen separately for each survey. The VLASS image contains a larger number of pixels, allowing a $200 \times 200$ pixel region to be used while still avoiding the target source and obvious artifacts. For the smaller FIRST and LoTSS images, a $30 \times 30$ pixel region was used instead. The peak flux was measured as the maximum pixel value inside the same $3' \times 3'$ cutout region used for the displayed images (as described in Section~\ref{ssec:crop}).
 
-The RMS noise and source peak flux were used to define the colour scale for
-each zoomed-in cutout. The lower limit was set to
-\texttt{vmin}~=~$-\mathrm{RMS}$ to keep the background noise visible but
-subdued, while the upper limit was set to \texttt{vmax} equal to the measured
-source peak flux so that the source structure used most of the available
-colour range.
+The RMS noise and source peak flux were used to define the colour scale for each zoomed-in cutout. The lower limit was set to \texttt{vmin}~=~$-\mathrm{RMS}$ to keep the background noise visible but subdued, while the upper limit was set to \texttt{vmax} equal to the measured source peak flux so that the source structure used most of the available colour range.
 
 \subsection{Plotting choices}
 
-The final plots were displayed using \texttt{imshow}, and the interpolation was set to
-\texttt{interpolation='gaussian'} to smooth the visual appearance of the
-finite pixel sampling. This does not change the underlying FITS data, but it
-makes the plotted images easier to compare visually by reducing the blocky
-appearance of individual pixels. Each panel was plotted in right ascension and declination using the celestial
+The final plots were displayed using \texttt{imshow}, and the interpolation was set to \texttt{interpolation='gaussian'} to smooth the visual appearance of the finite pixel sampling. This does not change the underlying FITS data, but it makes the plotted images easier to compare visually by reducing the blocky appearance of individual pixels. Each panel was plotted in right ascension and declination using the celestial
 WCS from the corresponding FITS header.
 
 \subsection{Contour maps}
 
-The contour maps were also produced for the
-same cutout regions. The contours were plotted using \texttt{ax.contour}. For each survey, the contour levels were set at
-$3$, $5$, $10$, $20$, and $50$ times the local RMS noise.
+The contour maps were also produced for the same cutout regions. The contours were plotted using \texttt{ax.contour}. For each survey, the contour levels were set at $3$, $5$, $10$, $20$, and $50$ times the local RMS noise.
 
-Using contours in units of the RMS noise allows the source structure to be
-compared across surveys even though the absolute flux densities and noise
-levels differ. The lowest contour, $3\sigma$, traces the faintest significant
-emission, while the higher contours show how the emission becomes concentrated
-toward the brightest regions of the source.
+Using contours in units of the RMS noise allows the source structure to be compared across surveys even though the absolute flux densities and noise levels differ. The lowest contour, $3\sigma$, traces the faintest significant emission, while the higher contours show how the emission becomes concentrated toward the brightest regions of the source.
 
 \section{Results}
 \label{sec:results}
 
-Figure~\ref{fig:six-panel} shows the same source in the three different radio surveys,
-with both colour-scaled cutouts (left column) and contour maps (right
-column).
+Figure~\ref{fig:six-panel} shows the same source in the three different radio surveys, with both colour-scaled cutouts (left column) and contour maps (right column).
 
 \begin{figure}[H]
   \centering
@@ -229,9 +158,7 @@ The source is detected in all three radio surveys, but its apparent morphology c
 To start, the images are clearly showing the same object. The overall two component morphology is recognizable in all three surveys as a bright compact source on the bottom left and a nearby, more diffuse ring-like feature to the top right, with the same relative positions and orientation on the sky. This consistency across roughly an order of magnitude in observing frequency is what makes it meaningful to compare the panels in the first place.
 
 The clearest difference between the surveys is angular resolution. The VLASS image shows the sharpest and most compact structure, while the LoTSS image appears broader and more spatially smoothed. This behaviour is consistent with the resolution scaling in Eq.~\ref{eq:resolution}:
-for a fixed telescope size or interferometric baseline, longer-wavelength,
-lower-frequency observations produce a larger synthesized beam and therefore
-a coarser image \citep{condon_ransom_2016}. The same trend appears in the contour maps. The VLASS and FIRST contours show more compact substructure, while the LoTSS contours are smoother and more extended.
+for a fixed telescope size or interferometric baseline, longer-wavelength, lower-frequency observations produce a larger synthesized beam and therefore a coarser image \citep{condon_ransom_2016}. The same trend appears in the contour maps. The VLASS and FIRST contours show more compact substructure, while the LoTSS contours are smoother and more extended.
 
 The LoTSS image also shows more diffuse emission between the two bright source components. This is most likely because the larger LoTSS beam smooths over small-scale structure, making the emission appear more continuous. In contrast, the higher-frequency VLASS image better resolves compact features, so the source appears sharper but less extended.
 
